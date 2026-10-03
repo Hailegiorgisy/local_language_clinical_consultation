@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: health_user
+      POSTGRES_PASSWORD: health_password
+      POSTGRES_DB: health_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://health_user:health_password@postgres:5432/health_db
+    depends_on:
+      - postgres
+
+  bot:
+    build: ./bot
+    environment:
+      - TELEGRAM_BOT_TOKEN=8686570236:AAFEIDNGFE95cFD0DTMy-gc0y05s98b9d3Q
+      - API_BASE_URL=http://backend:8000/api/v1
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
